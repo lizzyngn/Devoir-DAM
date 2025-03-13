@@ -49,5 +49,3 @@ def pression(theta, thetaC, deltaThetaC, s):
     # Résultats
     p_solution = solution.y[0]
     return p_solution
-
-
