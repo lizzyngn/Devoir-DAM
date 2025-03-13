@@ -1,6 +1,7 @@
 from scipy.integrate import solve_ivp
 import numpy as np
 # Test git
+# test numéro 2
 
 D = None #@valeur alesage@ #[m]
 C = None #@valeur course@ #[m]
@@ -49,5 +50,3 @@ def pression(theta, thetaC, deltaThetaC, s):
     # Résultats
     p_solution = solution.y[0]
     return p_solution
-
-
