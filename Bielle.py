@@ -1,8 +1,7 @@
 from scipy.integrate import solve_ivp
 import numpy as np
-# Test git
-# test numéro 2
 
+# Grandeurs géométriques du moteur
 D = None #@valeur alesage@ #[m]
 C = None #@valeur course@ #[m]
 L = None #@valeur longueur bielle@ #[m]
