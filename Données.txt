@@ -1,0 +1,16 @@
+- Déterminer les grandeurs géométriques
+Je me suis basée sur la fiche technique du moteur de la Suzuki Swift II 1.2 VVT qui est un moteur essence
+vu que c'est la bielle qu'on analyse, même si je sais pas si c'est un moteur essence ce qu'on a
+https://www.autotitre.com/fiche-technique/Suzuki/Swift/II/1.2_VVT
+https://fr.wikipedia.org/wiki/Suzuki_Swift_II
+
+1. Diamètre de l'alésage (diamètre interne du cylindre) = 73mm (internet)
+2. Course du piston = 74.2mm (internet)
+3. Longueur de la bielle = 166.4mm (séance de mesure, c'était pas très précis c'est plus ou moins ça)
+4. Masse du piston = ?
+C'est censé se situer entre 300-400g selon chat
+5. Masse de la bielle = ?
+C'est censé se situer entre 500-600g selon chat, à deux doigt de prendre ma balance à la prochaine séance de mesure
+6. Taux de compression = 11 (11:1, lorsque le piston est au PMB le mélange air/carburant occupe 11 fois
+le volume qu'il a lorsque le piston est au PMH). En moyenne le taux de compression va de 8 à 13 pour un moteur essence,
+et pour les moteurs diesel ça va de 16 à 21 (injection indirecte) ou de 22 à 25 (injection directe) 
