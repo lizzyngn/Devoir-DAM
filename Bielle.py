@@ -66,14 +66,17 @@ def F_crit(rpm, s, theta, thetaC, deltaThetaC) :
     return np.max((F_pied_output(rpm, s, theta, thetaC, deltaThetaC) + F_tete_output(rpm, s, theta, thetaC, deltaThetaC)) / 2)
 
 def t(rpm, s, theta, thetaC, deltaThetaC):
-    F = F_crit(rpm, s, theta, thetaC, deltaThetaC)
+    F_critique = F_crit(rpm, s, theta, thetaC, deltaThetaC)
     E = 200e9  # Module d'élasticité [Pa]
     sigma_C = 450e6  # Résistance à la compression [Pa]
     K_x, K_y = 1, 0.5  # Facteurs de correction selon la direction
     I_x = (419/12)  # Facteur du moment d’inertie en x
     I_y = (131/12)  # Facteur du moment d’inertie en y
-    t_x = ((np.pi**2 * E * I_x) / (K_x * L)**2 + 1 / (np.pi * sigma_C))**0.25
-    t_y = ((np.pi**2 * E * I_y) / (K_y * L)**2 + 1 / (np.pi * sigma_C))**0.25 
+    F_euler_x = ((np.pi * np.pi) * E * I_x)/((K_x*L)**2)
+    F_euler_y = ((np.pi * np.pi) * E * I_y)/((K_y*L)**2)
+    t_x = (F_euler_x + 1 / (np.pi * sigma_C))**0.25
+    t_y = (F_euler_y + 1 / (np.pi * sigma_C))**0.25
+    # Formule de Rankine et utilisation de la force critique? 
     t = max(t_x, t_y)  #ici j'ai un doute que ce soit le max parce que quand je lui avit parlé du K
     #il m'avait dit de prendre 1 donc il y a moyen que ce soit tjs t_x
     return t
