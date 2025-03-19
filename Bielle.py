@@ -21,9 +21,7 @@ def Q(s):
     R_1 = 8.314 #constante des gaz parfaits [J/(mol*K)]
     M_air = 28.96  #masse molaire de l'air [g/mol]
     p_1 = 100000 * s #pression d'admission, avec p_atm = 100000, [Pa]
-    T_1 = 303.15 #à déterminer peut être avec la formule T_admission * (s) ** ((gamma - 1) / gamma)
-#jsp comment le trouver juste qu'il faut utiliser gamma = 1.3 #temperature [K]
-# Elle est de 30°, c'est ce qui est mis sur inginious
+    T_1 = 303.15
     masse_vol_air = (p_1 * M_air)/(R_1*T_1)
     return (V_c * masse_vol_air * PCI)/Mair_carb
 
