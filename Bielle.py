@@ -6,8 +6,8 @@ import numpy as np
 D = 73e-3 #e@valeur alesage@ #[m]
 C = 74.2e-3 #@valeur course@ #[m]
 L = 166.4e-3 #@valeur longueur bielle@ #[m]
-mpiston = None #@valeur masse piston@ #[kg]
-mbielle = None #@valeur masse bielle@ #[kg]
+mpiston = 0.3 #@valeur masse piston@ #[kg]
+mbielle = 0.6 #@valeur masse bielle@ #[kg]
 tau = 11  #@valeur taux compression@ #[-] Vmax/Vmin
 Mair_carb = 14.5 #@valeur melange air carburant, 14.5[kg_air/kg_fuel] pour un moteur essence ou 26 [kg_air/kg_fuel] pour un moteur diesel  @ #[kg_air/kg_fuel]
 
@@ -40,11 +40,10 @@ def dVolumesurdtheta(theta):
     return (V_c/2)*(np.sin(theta)+(np.sin(theta)*np.cos(theta))/(np.sqrt(beta*beta - np.sin(theta) * np.sin(theta))))
 
 # Evolution de la pression dans le cylindre
-def dpsurdtheta(theta, thetaC, deltaThetaC, s, p):
+def dpsurdtheta(theta, p, thetaC, deltaThetaC, s):
     return -gamma * (p/V_output(theta))*dVolumesurdtheta(theta) +(gamma - 1) * (1/V_output(theta))*Q_output(theta, thetaC, deltaThetaC, s)
 
-def pression(theta, thetaC, deltaThetaC, s): #j'ai changé cette partie car il y avait une erreur qui s'affichait
-    #car il manquait une partie de la ligne
+def pression(theta, thetaC, deltaThetaC, s):
     p_1 = 100000 * s  # Pression initiale [Pa]
     solution = solve_ivp(dpsurdtheta, (theta[0], theta[-1]), [p_1], t_eval=theta, method='RK45',
                          args=(thetaC, deltaThetaC, s))
@@ -81,10 +80,10 @@ def equation_de_rankine(t, F_critique):
     return [eq_x, eq_y]
 
 def t(rpm, s, theta, thetaC, deltaThetaC):
-    F_critique = F_crit(theta, rpm, thetaC, deltaThetaC, s)
+    F_critique = F_crit(rpm, s, theta, thetaC, deltaThetaC)
     
     # Résolution de l'équation de Rankine
-    t_init = 0.0  # 0.005?
+    t_init = 0.005  # Valeur arbitraire d'épaisseur de la bielle
     solution = fsolve(equation_de_rankine, [t_init, t_init], args=(F_critique,))
     
     t_max = max(solution)
@@ -104,7 +103,7 @@ def myfunc(rpm, s, theta, thetaC, deltaThetaC):
     return V, Q, F_pied, F_tete, p, t_res
 
 # Test (chat)
-theta_test = np.linspace(-180, 180, 360)
+theta_test = np.radians(np.linspace(-180, 180, 360))
 V, Q, F_pied, F_tete, p, epaisseur = myfunc(3000, 1.2, theta_test, 30, 40)
 print("Volume du cylindre:", V[:5])
 print("Apport de chaleur:", Q[:5])
