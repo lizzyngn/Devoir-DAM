@@ -1,4 +1,5 @@
 from scipy.integrate import solve_ivp
+from scipy.optimize import fsolve
 import numpy as np
 
 # Grandeurs géométriques du moteur basée sur le moteur Suzuki Swift II essence
@@ -21,9 +22,7 @@ def Q(s):
     R_1 = 8.314 #constante des gaz parfaits [J/(mol*K)]
     M_air = 28.96  #masse molaire de l'air [g/mol]
     p_1 = 100000 * s #pression d'admission, avec p_atm = 100000, [Pa]
-    T_1 = 303.15 #à déterminer peut être avec la formule T_admission * (s) ** ((gamma - 1) / gamma)
-#jsp comment le trouver juste qu'il faut utiliser gamma = 1.3 #temperature [K]
-# Elle est de 30°, c'est ce qui est mis sur inginious
+    T_1 = 303.15
     masse_vol_air = (p_1 * M_air)/(R_1*T_1)
     return (V_c * masse_vol_air * PCI)/Mair_carb
 
@@ -65,21 +64,32 @@ def F_tete_output(rpm, s, theta, thetaC, deltaThetaC):
 def F_crit(rpm, s, theta, thetaC, deltaThetaC) :
     return np.max((F_pied_output(rpm, s, theta, thetaC, deltaThetaC) + F_tete_output(rpm, s, theta, thetaC, deltaThetaC)) / 2)
 
-def t(rpm, s, theta, thetaC, deltaThetaC):
-    F_critique = F_crit(rpm, s, theta, thetaC, deltaThetaC)
+def equation_de_rankine(t, F_critique):
     E = 200e9  # Module d'élasticité [Pa]
     sigma_C = 450e6  # Résistance à la compression [Pa]
     K_x, K_y = 1, 0.5  # Facteurs de correction selon la direction
-    I_x = (419/12)  # Facteur du moment d’inertie en x
-    I_y = (131/12)  # Facteur du moment d’inertie en y
-    F_euler_x = ((np.pi * np.pi) * E * I_x)/((K_x*L)**2)
-    F_euler_y = ((np.pi * np.pi) * E * I_y)/((K_y*L)**2)
-    t_x = (F_euler_x + 1 / (np.pi * sigma_C))**0.25
-    t_y = (F_euler_y + 1 / (np.pi * sigma_C))**0.25
-    # Formule de Rankine et utilisation de la force critique? 
-    t = max(t_x, t_y)  #ici j'ai un doute que ce soit le max parce que quand je lui avit parlé du K
-    #il m'avait dit de prendre 1 donc il y a moyen que ce soit tjs t_x
-    return t
+    I_x = (419/12)*(t**4)  # Moment d’inertie en x
+    I_y = (131/12)*(t**4)  # Moment d’inertie en y
+    A = 11 * (t ** 2) # Aire de la bielle
+    F_euler_x = ((np.pi * np.pi) * E * I_x)/((K_x*L)**2) # Force d'Euler selon x
+    F_euler_y = ((np.pi * np.pi) * E * I_y)/((K_y*L)**2) # Force d'Euler selon y
+
+    # Equation de Rankine dans les deux directions
+    eq_x = (1 / F_critique) - (1 / F_euler_x) - (1 / (A * sigma_C))
+    eq_y = (1 / F_critique) - (1 / F_euler_y) - (1 / (A * sigma_C))
+
+    return [eq_x, eq_y]
+
+def t(rpm, s, theta, thetaC, deltaThetaC):
+    F_critique = F_crit(theta, rpm, thetaC, deltaThetaC, s)
+    
+    # Résolution de l'équation de Rankine
+    t_init = 0.0  # 0.005?
+    solution = fsolve(equation_de_rankine, [t_init, t_init], args=(F_critique,))
+    
+    t_max = max(solution)
+    
+    return t_max
 
 def myfunc(rpm, s, theta, thetaC, deltaThetaC):
     
