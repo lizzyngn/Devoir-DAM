@@ -18,7 +18,7 @@ gamma = 1.3 # Coefficient isentropique
 
 # Evolution de l'apport de chaleur
 def Q(s):
-    PCI = 2800e3 #valeur du pouvoir calorifique inférieur de l'essence #[J/kg]
+    PCI = 43e6 #valeur du pouvoir calorifique inférieur de l'essence #[J/kg]
     R_1 = 8.314 #constante des gaz parfaits [J/(mol*K)]
     M_air = 0.02896  #masse molaire de l'air [g/mol]
     p_1 = 1e5 * s #pression d'admission, avec p_atm = 100000, [Pa]
@@ -26,21 +26,18 @@ def Q(s):
     m_air = (p_1 * V_c * M_air)/(R_1*T_1)
     return (m_air * PCI)/Mair_carb
 
+def dQsurdtheta(theta, thetaC, deltaThetaC, s):
+    return np.where((thetaC < theta) & (theta < thetaC+deltaThetaC), (Q(s) / 2) * (np.pi / deltaThetaC) * np.sin(np.pi * (theta - thetaC) / deltaThetaC), 0)
+
 def Q_output(theta, thetaC, deltaThetaC, s):
     return np.where((theta> thetaC) & (theta < thetaC+deltaThetaC), (Q(s)/2) *(1- np.cos(np.pi*((theta - thetaC)/deltaThetaC))), 0)
 
-def dQsurdtheta(theta, thetaC, deltaThetaC, s):
-    #return np.where((thetaC < theta) & (theta < thetaC+deltaThetaC), (Q(s) / 2) * (np.pi / deltaThetaC) * np.sin(np.pi * (theta - thetaC) / deltaThetaC), 0)
-    return np.where((theta> thetaC) & (theta < thetaC+deltaThetaC), (Q(s)/2) * np.sin((np.pi *(theta-thetaC))/deltaThetaC) *(np.pi/deltaThetaC), 0)
-
 # Evolution du volume du cylindre
 def V_output(theta):
-    theta_rad = np.radians(theta) # Conversion en radian
-    return (V_c/2)*( 1 - np.cos(theta_rad) + beta - np.sqrt(beta*beta - np.sin(theta_rad)*np.sin(theta_rad))) +(V_c/(tau-1))
+    return (V_c/2)*( 1 - np.cos(theta) + beta - np.sqrt(beta*beta - np.sin(theta)*np.sin(theta))) +(V_c/(tau-1))
 
 def dVolumesurdtheta(theta):
-    theta_rad = np.radians(theta) # Conversion en radian
-    return (V_c/2)*(np.sin(theta_rad)+(np.sin(theta_rad)*np.cos(theta_rad))/(np.sqrt(beta*beta - np.sin(theta_rad) * np.sin(theta_rad))))
+    return (V_c/2)*(np.sin(theta)+(np.sin(theta)*np.cos(theta))/(np.sqrt(beta*beta - np.sin(theta) * np.sin(theta))))
 
 # Evolution de la pression dans le cylindre
 def dpsurdtheta(theta, p, thetaC, deltaThetaC, s):
@@ -56,11 +53,11 @@ def pression(theta, thetaC, deltaThetaC, s):
 # Vitesse normale : 3000 rpm, vitesse élevée : 5000 rpm
 def F_pied_output(rpm, s, theta, thetaC, deltaThetaC):
     omega = (rpm * 2 * np.pi) / 60  # Conversion rpm en rad/s
-    return ((np.pi * (D**2)) / 4) * pression(theta, thetaC, deltaThetaC, s) - mpiston * R * omega*omega * np.cos(np.radians(theta))
+    return ((np.pi * (D**2)) / 4) * pression(theta, thetaC, deltaThetaC, s) - mpiston * R * omega*omega * np.cos(theta)
 
 def F_tete_output(rpm, s, theta, thetaC, deltaThetaC):
     omega = (rpm * 2 * np.pi) / 60  # Conversion rpm en rad/s
-    return -((np.pi * (D**2)) / 4) * pression(theta, thetaC, deltaThetaC, s) + (mpiston + mbielle) * R * omega*omega * np.cos(np.radians(theta))
+    return -((np.pi * (D**2)) / 4) * pression(theta, thetaC, deltaThetaC, s) + (mpiston + mbielle) * R * omega*omega * np.cos(theta)
 
 # Epaisseur critique de la bielle (flambage)
 def F_crit(rpm, s, theta, thetaC, deltaThetaC) :
@@ -94,6 +91,9 @@ def t(rpm, s, theta, thetaC, deltaThetaC):
     return max(solution)
 
 def myfunc(rpm, s, theta, thetaC, deltaThetaC):
+    theta = np.deg2rad(theta)
+    thetaC = -np.deg2rad(thetaC)
+    deltaThetaC = np.deg2rad(deltaThetaC)
     
     # Calcul des résultats
     V = V_output(theta)
